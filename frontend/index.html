@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gestión y contabilidad</title>
+    <!-- vue-select css -->
+    <link rel="stylesheet" href="https://unpkg.com/vue-select@latest/dist/vue-select.css">
+    <!-- css propio -->
+    <link href="./css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div>
+    <div id="app" class="contenedorGeneral">
+      <!-- Columna izquierda -->
+      <div class="contenedor" id="colIzquierda">
+        <section v-if="colIzquierda.cargando">
+          cargando...
+        </section>
+        <section class="contenedor" v-else>
+        <div class="titulo">
+          Asiento
+        </div>
+        <form v-on:submit.prevent="createAsiento">
+          <div class="d-flex flex-column">
+            <div class="d-inline-flex">
+              <div class="d-flex flex-column flex-grow">
+                <label for="id_operacion">Operación:</label>
+                <!-- <v-select :options="[{label: 'Canada', code: 'ca'}]"></v-select> -->
+                <select class="campo" id="id_operacion" name="id_operacion" v-model="asiento.operacion">
+                  <option class="" v-for="operacion in operaciones" :value="operacion.id">{{ operacion.detalle }}</option>
+                </select>
+              </div>
+              <div class="d-inline-flex">
+                <div class="d-flex flex-column flex-grow">
+                  <label for="fecha">Fecha R:</label>
+                  <input class="form-control" type="date" id="fecha" name="fecha" v-model="asiento.fechaRegistro">
+                </div>
+                <div class="d-flex flex-column flex-grow">
+                  <label for="fecha">Fecha M:</label>
+                  <input class="form-control" type="date" id="fecha" name="fecha" v-model="asiento.fechaMovimiento">
+                </div>
+              </div>
+            </div>
+            <div class="d-flex flex-column flex-grow">
+              <input class="form-control" type="text" id="descripcion" name="descripcion" v-model="asiento.detalle" placeholder="Ingrese una descripcion del asiento">
+              <label class="form-label" for="descripcion">Descripción:</label>
+            </div>
+            <div class="titulo">
+              Transacciones
+            </div>
+            <div class="table">
+              <div class="header">
+                <div class="column column1"><span style="width:10em">Importe</span></div>  
+                <div class="column column2"><span style="width:8em">tc</span></div>  
+                <div class="column column3"><span style="width:22em">Cuenta</span></div>  
+                <div class="column column4">Detalle</div>
+              </div>
+              <div class="body">
+                <div  class="row" v-for="(transaccion, index) in asiento.transacciones" :key="index">
+                  <div class="column column1">
+                    <input class="form-control" style="width:8em;text-align:right;" v-bind:class="{ 'border border-danger': !transaccion.movimiento }" type="number" v-model.number="transaccion.movimiento">
+                  </div>
+                  <div class="column column2">
+                    <input class="form-control" style="width:6em;text-align:right;" type="number" step="0.01" v-model.number="transaccion.tc">
+                  </div>
+                  <div class="column column3">
+                    <!-- <v-select :options="[{label: 'Canada', code: 'ca'}]"></v-select> -->
+                    <select class="form-select" style="width:20em;" v-model="transaccion.cuenta">
+                      <option v-for="cuenta in cuentas" :value="cuenta.id">{{ cuenta.nombre }}</option>
+                    </select>
+                  </div>
+                  <div class="column column4">
+                    <input style="box-sizing: border-box;" type="text" v-model="transaccion.detalle">
+                    <button v-if="index >= 2" class="" v-on:click.prevent="deleteTransaccion(index)">X</button>
+                  </div>
+                </div>
+              </div>
+              <div class="body">
+                <div class="row">
+                  <div class="column">
+                    <span style="width:8.9em; border:solid #228B22 1px;text-align:right;padding:0.3rem;">{{ totalTransacciones }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="d-block">
+              <p><button class="" v-on:click.prevent="addTransaccion">Agregar transacción</button></p>
+              <div>
+                <input type="file" ref="losAdjuntos" @change="agregoAdjuntos" multiple type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif">
+                <ul>
+                  <li v-for="(adj, index) in asiento.adjuntosAsientos" :key="index">
+                    {{ adj.adjunto }}
+                    <button @click.prevent="eliminarAdjunto(index)">X</button>
+                  </li>
+                </ul>
+              </div>
+              <p><button class="" type="submit">Crear asiento</button></p>
+            </div>
+          </div>
+        </form>
+        </section>
+      </div>
+      <!-- Columna derecha -->
+      <div class="contenedor" id="colDerecha">
+        <label for="menuCuenta">Seleccione una cuenta:</label>
+        <select ref="menuCuentaRef" id="menuCuenta" @change="get_transacciones($event.target.value)">
+          <option v-for="cuenta in cuentas" :value="cuenta.id">{{ cuenta.nombre }}</option>
+        </select>
+        <section v-if="colDerecha.cargando">
+          cargando...
+        </section>
+        <section v-else>
+        <table>
+          <thead>
+            <tr>
+              <td title="Registro">Fecha R</td>
+              <td title="Movimiento">Fecha M</td>
+              <td>As</td>
+              <td>Op</td>
+              <td>Movimiento</td>
+              <td>Saldo</td>
+              <td>Detalle</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(transaccion,index) in transacciones">
+              <td class="col-c" style="font-size:10px;">{{formatoFecha(transaccion.fechaRegistro)}}</td>
+              <td class="col-c" style="font-size:10px;">{{formatoFecha(transaccion.fechaMovimiento)}}</td>
+              <td class="col-c" title="Asiento"><a href="#" @click="cargaAsiento(transaccion.asiento)">{{transaccion.asiento}}</a></td>
+              <td class="col-c" title="Operacion">{{transaccion.operacion}}</td>
+              <td class="col-r">{{formatoNumero(transaccion.movimiento)}}</td>
+              <td class="col-r">{{formatoNumero(saldos[index])}}</td>
+              <td class="col-w">{{muestraDetalle(transaccion)}}</td>
+            </tr>
+          </tbody>
+        </table>
+        </section>
+      </div>
+    </div>
+    </div> 
+    <!-- vue latest-->
+    <script src="https://unpkg.com/vue@latest"></script>
+    <!-- use the latest vue-select release -->
+    <script src="https://unpkg.com/vue-select@latest"></script>
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js" crossorigin="anonymous"></script>
+    <!-- scripts propios -->
+    <script type="module" src="js/main.mjs"></script>
+  </body>
+</html>
