@@ -1,1 +1,27 @@
 ./backend/uploads/*
+# Archivos y carpetas generados por el entorno de desarrollo
+.env
+.vscode/
+.idea/
+
+# Archivos de caché y registros
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.log
+
+# Archivos de configuración local
+*.ini
+*.cfg
+*.env
+
+# Archivos de generación de documentación
+docs/_build/
+
+# Carpetas y archivos específicos de Python
+venv/
+dist/
+build/
+*.egg-info/
