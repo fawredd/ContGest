@@ -24,6 +24,9 @@ El fin es poder llevar un control sobre las operaciones comerciales de una micro
 --Flask-CORS
 --Yo use base de datos MySQL
 
+#TEST
+https://fawredd.github.io/ContGest/
+
 #Pendientes:
 -Estructurar back y front
 -Gestion de usuarios
