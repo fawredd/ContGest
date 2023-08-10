@@ -101,7 +101,7 @@ const app = Vue.createApp({
           }
         }
         formData.append('asiento', JSON.stringify(this.asiento));
-        axios.post('http://fawredd.pythonanywhere.com/asientos', formData,{
+        axios.post('https://fawredd.pythonanywhere.com/asientos', formData,{
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -140,7 +140,7 @@ const app = Vue.createApp({
     },
     get_cuentas(){
         /* Cargo todas las cuentas del plan de cuentas */
-      axios.get('http://fawredd.pythonanywhere.com/cuentas')
+      axios.get('https://fawredd.pythonanywhere.com/cuentas')
       .then(response => {
         this.cuentas = response.data;
       })
@@ -152,7 +152,7 @@ const app = Vue.createApp({
     get_operaciones(){
       console.log("getOperaciones");
       /* Cargo todas las operaciones */  
-      axios.get('http://fawredd.pythonanywhere.com/operaciones')
+      axios.get('https://fawredd.pythonanywhere.com/operaciones')
       .then(response => {
         this.operaciones = response.data;
       })
@@ -189,7 +189,7 @@ const app = Vue.createApp({
     get_transacciones(cuenta){
       this.colDerecha.cargando = true;
       /* Cargo las transacciones asociadas a una cuenta */  
-      axios.get(`http://fawredd.pythonanywhere.com/cuentas/${cuenta}`)
+      axios.get(`https://fawredd.pythonanywhere.com/cuentas/${cuenta}`)
       .then(response => {
         this.transacciones = response.data;
         this.colDerecha.cargando = false;
@@ -216,7 +216,7 @@ const app = Vue.createApp({
     cargaAsiento(id){
       this.colIzquierda.cargando = true;
       /* Cargo las transacciones asociadas a una cuenta */  
-      axios.get(`http://fawredd.pythonanywhere.com/asientos/${id}`)
+      axios.get(`https://fawredd.pythonanywhere.com/asientos/${id}`)
       .then(response => {
         this.asiento = response.data;
       })
